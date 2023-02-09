@@ -1,47 +1,52 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatServerThread extends Thread {
 
-    private static List<PrintWriter> clients = new ArrayList<>();
+    private static List<Socket> clients = new ArrayList<>();
     private Socket clientSocket = null;
 
     public ChatServerThread(Socket socket) {
         super("ChatServerThread");
-        try {
-            clients.add(new PrintWriter(socket.getOutputStream(), true));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        };
+        clients.add(socket);
         this.clientSocket = socket;
     }
 
     @Override
     public void run() {
         try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                DataInputStream in = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()))
         ) {
-            String messageIn, messageOut;
+            String line = "";
+            String formattedMessage;
 
-            while ((messageIn = in.readLine()) != null) {
+            while (!line.equals(".")) {
+//                line = in.readLine();
+                line = in.readUTF();
+                // format message
                 String senderIP = clientSocket.getLocalAddress().toString().substring(1);
                 int senderPort = clientSocket.getPort();
-                messageOut = String.format("<From %s:%d>: %s", senderIP, senderPort, messageIn);
-                broadcast(messageOut);
+                formattedMessage = String.format("<From %s:%d>: %s", senderIP, senderPort, line);
+                // broadcast formatted message
+                broadcastMessage(formattedMessage);
             }
+            // terminates connection
+            System.out.println("Connection closed...");
+            clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void broadcast(String message) {
-        for (PrintWriter client : clients) {
-                client.println(message);
+    private void broadcastMessage(String message) throws IOException {
+        System.out.println(message);
+        for (Socket client : clients) {
+            System.out.println("sending multiple messages" + message);
+            PrintWriter out = new PrintWriter(client.getOutputStream());
+            out.println(message);
         }
     }
 }

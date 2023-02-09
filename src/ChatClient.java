@@ -1,17 +1,13 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ChatClient {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         if (args.length != 2) {
-            System.err.println(
-                    "Usage: java ChatClient <host name> <port number>");
+            System.err.println("Usage: java ChatClient <host name> <port number>");
             System.exit(1);
         }
 
@@ -19,32 +15,41 @@ public class ChatClient {
         int portNumber = Integer.parseInt(args[1]);
 
         try (
-                Socket chatSocket = new Socket(hostName, portNumber);
-                PrintWriter out = new PrintWriter(chatSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(chatSocket.getInputStream()));
+                // socket
+                Socket socket = new Socket(hostName, portNumber);
+                // sends output
+//                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                // takes input from server
+//                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                // takes input from terminal
                 BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
-//            String serverOutput;
-            String clientInput;
+            System.out.println("Connected");
 
-            while ((clientInput = stdIn.readLine()) != null) {
-                out.println(clientInput);
-                System.out.println(in.readLine());
+            // thread to receive message from server
+            new Thread(() -> {
+                while (true) {
+                    String serverOutput;
+                    try {
+                        serverOutput = in.readUTF();
+                        System.out.println(serverOutput);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+
+                }
+            }).start();
+
+            String clientInput = "";
+
+            while (!clientInput.equals(".")) {
+                clientInput = stdIn.readLine();
+//                out.println(clientInput);
+                out.writeUTF(clientInput);
             }
-
-//            while (true) {
-//                System.out.println("test");
-//                clientInput = stdIn.readLine();
-//                serverOutput = in.readLine();
-//
-//                if (clientInput != null) {
-//                    out.println(clientInput);
-//                }
-//
-//                if (serverOutput != null) {
-//                    System.out.println(serverOutput);
-//                }
-//            }
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
