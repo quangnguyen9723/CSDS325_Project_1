@@ -2,30 +2,31 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-//TODO: for now, the client may not need to send GREETING message
 public class ChatServer {
-    public static void main(String[] args) {
+    private static final int PORT = 8081;
 
-        if (args.length != 1) {
-            System.err.println("Usage: java ChatServer <port number>");
-            System.exit(1);
+    public static void main(String args[]) {
+        ServerSocket serverSocket = null;
+        Socket socket = null;
+
+        //starts the server
+        try {
+            serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+            System.out.println("Server Initialized...\n");
+        } catch (IOException e) {
+            System.out.println("error creating server socket");
         }
 
-        int portNumber = Integer.parseInt(args[0]);
-        boolean listening = true;
-        int clientCount = 0;
-
-        // support for multiple clients using multi threads
-        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
-            System.out.println("Server initialized...");
-            while (listening) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Client " + ++clientCount + " accepted");
-                new ChatServerThread(clientSocket).start();
+        //while loop to accept multiple clients
+        while (true) {
+            try {
+                socket = serverSocket.accept();
+            } catch (IOException e) {
+                System.out.println("error accepting client socket");
             }
-        } catch (IOException e) {
-            System.err.println("Could not listen on port " + portNumber);
-            System.exit(-1);
+
+            //starts the server thread
+            new ChatServerThread(socket).start();
         }
     }
 }
