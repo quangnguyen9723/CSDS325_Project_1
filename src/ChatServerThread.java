@@ -7,8 +7,6 @@ class ChatServerThread extends Thread {
     private static List<Socket> socketList = new ArrayList<>();
     private Socket socket;
 
-    //TODO
-//    private DataInputStream inp = null;
     private BufferedReader inp = null;
 
     public ChatServerThread(Socket clientSocket) {
@@ -23,8 +21,6 @@ class ChatServerThread extends Thread {
         String line = "";
         while (line != null && !line.equals(".")) {
             try {
-                //TODO
-//                line = inp.readUTF();
                 line = inp.readLine();
 
                 sendMessageToClients(line);
@@ -40,8 +36,6 @@ class ChatServerThread extends Thread {
 
     private void initInputStream() {
         try {
-            //TODO
-//            inp = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             inp = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             System.out.println("error while creating input stream");
@@ -50,8 +44,6 @@ class ChatServerThread extends Thread {
 
     private void sendMessageToClients(String message) throws IOException {
         for (Socket other : socketList) {
-            //TODO
-//            DataOutputStream output = new DataOutputStream(other.getOutputStream());
             PrintWriter output = new PrintWriter(other.getOutputStream(), true);
 
             //format message to include sender's information
@@ -59,8 +51,6 @@ class ChatServerThread extends Thread {
             int port = socket.getPort();
             String formattedMessage = String.format("<From %s:%d>: %s", address, port, message);
 
-            //TODO
-//            output.writeUTF(formattedMessage);
             output.println(formattedMessage);
         }
     }

@@ -4,8 +4,6 @@ import java.net.Socket;
 public class ChatClient {
     private Socket socket = null;
     private BufferedReader input;
-    //TODO
-//    private DataOutputStream output = null;
     private PrintWriter output = null;
 
     public ChatClient(String address, int port) {
@@ -21,8 +19,6 @@ public class ChatClient {
             //takes input from terminal
             input = new BufferedReader(new InputStreamReader(System.in));
             //sends output to the socket (then to server)
-            //TODO
-//            output = new DataOutputStream(socket.getOutputStream());
             output = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
             System.out.format("Cannot connect to address %s at port %d", address, port);
@@ -33,12 +29,8 @@ public class ChatClient {
     // RECEIVER
     private void createRecipientThread() {
         //Here create a thread to receive message from server.
-        // TOOD
-//        DataInputStream inp;
         BufferedReader inp;
         try {
-            //TODO
-//            inp = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             inp = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             System.out.println("error creating input stream reader");
@@ -46,17 +38,13 @@ public class ChatClient {
         }
 
         new Thread(() -> {
-            while (true) {
-                String str;
-                try {
-                    //TODO
-//                    str = inp.readUTF();
-                    str = inp.readLine();
+            String str;
+            try {
+                while ((str = inp.readLine()) != null) {
                     System.out.println(str);
-                } catch (IOException e) {
-                    e.printStackTrace();//error.
-                    break;
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }, "Client Receiver.").start();
     }
@@ -74,13 +62,7 @@ public class ChatClient {
                 System.out.println("error while reading input");
             }
 
-//            try {
-                //TODO
-//                output.writeUTF(line);
-                output.println(line);
-//            } catch (IOException e) {
-//                System.out.println("error while sending message to server");
-//            }
+            output.println(line);
         }
         //close the connection
         try {
