@@ -53,17 +53,20 @@ class ChatServerThread extends Thread {
                 continue;
             }
 
-            try (PrintWriter output = new PrintWriter(socket.getOutputStream(), true)) {
-                //format message to include sender's information
-                String address = clientSocket.getLocalAddress().toString().substring(1);
-                int port = clientSocket.getPort();
-                String formattedMessage = String.format("<From %s:%d>: %s", address, port, message);
-                // broadcast message
-                output.println(formattedMessage);
+            PrintWriter output = null;
+            try {
+                output = new PrintWriter(socket.getOutputStream(), true);
             } catch (IOException e) {
-                System.out.println("error: cannot send message to client");
+                System.out.println("error: cannot init output stream");
+                System.exit(-1);
             }
 
+            //format message to include sender's information
+            String address = clientSocket.getLocalAddress().toString().substring(1);
+            int port = clientSocket.getPort();
+            String formattedMessage = String.format("<From %s:%d>: %s", address, port, message);
+            // broadcast message
+            output.println(formattedMessage);
         }
     }
 
