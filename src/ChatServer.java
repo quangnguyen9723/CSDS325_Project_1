@@ -3,9 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ChatServer {
-    private static final int PORT = 8081;
-
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         ServerSocket serverSocket = null;
         Socket socket = null;
 
@@ -15,6 +13,7 @@ public class ChatServer {
             System.out.println("Server Initialized...\n");
         } catch (IOException e) {
             System.out.println("error creating server socket");
+            System.exit(1);
         }
 
         //while loop to accept multiple clients

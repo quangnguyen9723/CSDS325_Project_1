@@ -10,7 +10,7 @@ public class ChatClient {
         //establish connection
         establishConnection(address, port);
         createRecipientThread();
-        createPersistentConnection();
+        createPersistentOutput();
     }
 
     private void establishConnection(String address, int port) {
@@ -38,10 +38,10 @@ public class ChatClient {
         }
 
         new Thread(() -> {
-            String str;
+            String line;
             try {
-                while ((str = inp.readLine()) != null) {
-                    System.out.println(str);
+                while ((line = inp.readLine()) != null) {
+                    System.out.println(line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -50,19 +50,18 @@ public class ChatClient {
     }
 
     // SENDER
-    private void createPersistentConnection() {
+    private void createPersistentOutput() {
         //string to read message from input
-        String line = "";
+        String line;
 
         //keep reading until "Over" is input
-        while (!line.equals(".")) {
-            try {
-                line = input.readLine();
-            } catch (IOException e) {
-                System.out.println("error while reading input");
+        try {
+            while ((line = input.readLine()) != null) {
+//                System.out.println("type: " + line);
+                output.println(line);
             }
-
-            output.println(line);
+        } catch (IOException e) {
+            System.out.println("error while reading input");
         }
         //close the connection
         try {
@@ -74,7 +73,7 @@ public class ChatClient {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         new ChatClient(args[0], Integer.parseInt(args[1]));
     }
 }
