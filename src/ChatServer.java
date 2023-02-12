@@ -4,28 +4,24 @@ import java.net.Socket;
 
 public class ChatServer {
     public static void main(String[] args) {
-        ServerSocket serverSocket = null;
-        Socket socket = null;
 
-        //starts the server
-        try {
-            serverSocket = new ServerSocket(Integer.parseInt(args[0]));
-            System.out.println("Server Initialized...\n");
-        } catch (IOException e) {
-            System.out.println("error creating server socket");
+        if (args.length != 1) {
+            System.err.println("Usage: java ChatServer <port number>");
             System.exit(1);
         }
 
-        //while loop to accept multiple clients
-        while (true) {
-            try {
-                socket = serverSocket.accept();
-            } catch (IOException e) {
-                System.out.println("error accepting client socket");
-            }
+        int portNumber = Integer.parseInt(args[0]);
+        boolean listening = true;
 
-            //starts the server thread
-            new ChatServerThread(socket).start();
+        // init server and accept multiple clients
+        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
+            System.out.println("Server Initialized...\n");
+            while (listening) {
+                new ChatServerThread(serverSocket.accept()).start();
+            }
+        } catch (IOException e) {
+            System.out.format("error: server cannot listen on port %d", portNumber);
+            System.exit(-1);
         }
     }
 }
